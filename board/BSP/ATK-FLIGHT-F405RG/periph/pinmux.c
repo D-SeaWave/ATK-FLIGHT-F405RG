@@ -1,8 +1,9 @@
 ﻿#include <core/sys.h>
+#include <periph/gpio.h>
 #include <periph/pinmux.h>
 #include <stm32f4xx_hal_cortex.h>
 
-static inline void periph_clock_enable(void)
+static void periph_clock_enable(void)
 {
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
@@ -27,18 +28,24 @@ static inline void periph_clock_enable(void)
      */
 }
 
-void periph_interrupt_config(void)
+static void periph_enable_interrupt(IRQn_Type irq, uint32_t preempt_pri, uint32_t subpri)
 {
-    HAL_NVIC_EnableIRQ(USART1_IRQn);
-    HAL_NVIC_SetPriority(USART1_IRQn, 3, 3);
-    HAL_NVIC_EnableIRQ(USART2_IRQn);
-    HAL_NVIC_SetPriority(USART2_IRQn, 3, 3);
-    HAL_NVIC_EnableIRQ(USART3_IRQn);
-    HAL_NVIC_SetPriority(USART3_IRQn, 3, 3);
-    HAL_NVIC_EnableIRQ(UART4_IRQn);
-    HAL_NVIC_SetPriority(UART4_IRQn, 3, 3);
-    HAL_NVIC_EnableIRQ(UART5_IRQn);
-    HAL_NVIC_SetPriority(UART5_IRQn, 3, 3);
+    HAL_NVIC_EnableIRQ(irq);
+    HAL_NVIC_SetPriority(irq, preempt_pri, subpri);
+}
+
+static void periph_interrupt_config(void)
+{
+    periph_enable_interrupt(USART1_IRQn, 3, 3);
+    periph_enable_interrupt(USART2_IRQn, 3, 3);
+    periph_enable_interrupt(USART3_IRQn, 3, 3);
+    periph_enable_interrupt(UART4_IRQn, 3, 3);
+    periph_enable_interrupt(UART5_IRQn, 3, 3);
+    periph_enable_interrupt(SPI1_IRQn, 0, 1);
+    /*
+    periph_enable_interrupt(SPI2_IRQn, 0, 1);
+    periph_enable_interrupt(SPI3_IRQn, 0, 1);
+     */
     HAL_NVIC_DisableIRQ(WWDG_IRQn);
     HAL_NVIC_DisableIRQ(USART6_IRQn);
 }
@@ -153,4 +160,5 @@ void pinmux_init(void)
     gpio.Alternate = GPIO_AF15_EVENTOUT;
     __ISB();
     __DSB();
+    gpio_set_pin(GPIOB, GPIO_PIN_9);
 }

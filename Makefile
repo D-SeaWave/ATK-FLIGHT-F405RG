@@ -11,7 +11,7 @@ SIZE    := $(CROSS_COMPILE)size
 OBJCOPY := $(CROSS_COMPILE)objcopy
 
 CFLAGS  := -mthumb -mcpu=cortex-m4
-CFLAGS  += -g -gdwarf-2
+CFLAGS  += -g -ggdb
 CFLAGS  += -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 ASFLAGS := $(CFLAGS)
 

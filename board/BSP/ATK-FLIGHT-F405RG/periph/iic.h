@@ -1,5 +1,5 @@
-#ifndef __BSP_STM32F767_ATK_APLLOTK_APLLO_IIC_H__
-#define __BSP_STM32F767_ATK_APLLOTK_APLLO_IIC_H__
+#ifndef __BSP_ATK_FLIGHT_F405RG_IIC_H__
+#define __BSP_ATK_FLIGHT_F405RG_IIC_H__
 
 #include <FreeRTOS.h>
 #include <task.h>
@@ -120,4 +120,4 @@ extern unsigned char i2c_write_byte_direct(const i2c_dev_t *restrict i2c_dev, co
 extern unsigned char i2c_write_bytes_direct(const i2c_dev_t *restrict i2c_dev, const unsigned char *restrict buf,
     const unsigned char len);
 
-#endif /* __BSP_STM32F767_ATK_APLLOTK_APLLO_IIC_H__ */
+#endif /* __BSP_ATK_FLIGHT_F405RG_IIC_H__ */

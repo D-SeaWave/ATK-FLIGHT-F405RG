@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include <math.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 #define MATHS_SUPPORT_DOUBLE_PRECISION
@@ -29,15 +30,10 @@ extern "C" {
 #define QUATERNION_DEFAULT(q)               \
     quaternion_t q = QUATERNION_DEFAULT_INITIALIZER
 
-struct point {
-    int x;
-    int y;
-};
-
 typedef struct {
-    short x;
-    short y;
-    short z;
+    int16_t x;
+    int16_t y;
+    int16_t z;
 } hvector3d_t;
 
 typedef struct {
@@ -62,6 +58,11 @@ static inline FLOAT degrees2radians(const FLOAT degrees)
 static inline FLOAT radians2degrees(const FLOAT rad)
 {
     return rad * (180.0f / M_PIf);
+}
+
+static inline int16_t tole16(int16_t raw_value)
+{
+    return (raw_value << 8) | (raw_value >> 8);
 }
 
 extern FLOAT fvector3d_size(const fvector3d_t *v);

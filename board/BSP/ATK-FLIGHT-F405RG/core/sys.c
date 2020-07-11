@@ -3,6 +3,8 @@
 #include <core/sys.h>
 #include <periph/pinmux.h>
 #include <periph/usart-uart.h>
+#include <periph/spi.h>
+#include <driver/mpu6000.h>
 
 extern void xPortPendSVHandler(void) __attribute__ (( naked ));
 extern void xPortSysTickHandler(void);
@@ -117,4 +119,6 @@ void system_init(void)
     system_clock_init();
     pinmux_init();
     uart_init();
+    spi_init();
+    mpu6000_init();
 }

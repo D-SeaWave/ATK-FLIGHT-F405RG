@@ -1,5 +1,5 @@
-#include "sys.h"
-#include "iic.h"
+#include <core/sys.h>
+#include <periph/iic.h>
 
 #define I2C_SIGNAL_NOACK    GPIO_PIN_SET
 #define I2C_SIGNAL_ACK      GPIO_PIN_RESET
@@ -33,22 +33,6 @@
 void i2c_bus_init(i2c_bus_t *restrict bus, GPIO_TypeDef *scl_gpio, const uint16_t scl_pin,
         GPIO_TypeDef *sda_gpio, const uint16_t sda_pin)
 {
-    GPIO_InitTypeDef GPIO_Initure;
-
-    GPIO_Initure.Pull = GPIO_PULLUP;
-    GPIO_Initure.Speed= GPIO_SPEED_FAST;
-    GPIO_Initure.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_Initure.Alternate = 0;
-
-    gpio_clk_enable(scl_gpio);
-    gpio_clk_enable(sda_gpio);
-
-    GPIO_Initure.Pin  = scl_pin;
-    HAL_GPIO_Init(scl_gpio, &GPIO_Initure);
-
-    GPIO_Initure.Pin = sda_pin;
-    HAL_GPIO_Init(sda_gpio, &GPIO_Initure);
-
     gpio_set_pin(scl_gpio, scl_pin);
     gpio_set_pin(sda_gpio, sda_pin);
 

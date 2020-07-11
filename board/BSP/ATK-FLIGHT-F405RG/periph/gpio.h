@@ -1,5 +1,5 @@
-#ifndef __BSP_STM32F767_ATK_APLLOTK_APLLO_GPIO_H__
-#define __BSP_STM32F767_ATK_APLLOTK_APLLO_GPIO_H__
+#ifndef __BSP_ATK_FLIGHT_F405RG_GPIO_H__
+#define __BSP_ATK_FLIGHT_F405RG_GPIO_H__
 
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_gpio.h>
@@ -9,25 +9,17 @@ typedef struct {
 	unsigned int  pin;
 } single_gpio_pin_t;
 
-__STATIC_FORCEINLINE void gpio_clk_enable(GPIO_TypeDef *restrict GPIO)
+static inline void gpio_set_pin(GPIO_TypeDef *restrict GPIO, const uint16_t pin)
 {
-    __DMB();
-    RCC->AHB1ENR |= 1 << (((uint32_t)GPIO - GPIOA_BASE) >> 10);
-}
-
-__STATIC_FORCEINLINE void gpio_set_pin(GPIO_TypeDef *restrict GPIO, const uint16_t pin)
-{
-    __DMB();
     GPIO->BSRR = (uint32_t)pin;
 }
 
-__STATIC_FORCEINLINE void gpio_reset_pin(GPIO_TypeDef *restrict GPIO, const uint16_t pin)
+static inline void gpio_reset_pin(GPIO_TypeDef *restrict GPIO, const uint16_t pin)
 {
-    __DMB();
     GPIO->BSRR = (uint32_t)pin << 16;
 }
 
-extern void gpio_switch_io_mode(GPIO_TypeDef *restrict GPIO,
-    const uint16_t pin, const uint8_t mode);
+extern void gpio_switch_io_mode(GPIO_TypeDef *restrict GPIO, const uint16_t pin,
+        const uint8_t mode);
 
-#endif /* __BSP_STM32F767_ATK_APLLOTK_APLLO_GPIO_H__ */
+#endif /* __BSP_ATK_FLIGHT_F405RG_GPIO_H__ */
