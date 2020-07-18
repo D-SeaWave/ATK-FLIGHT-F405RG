@@ -112,3 +112,7 @@ flash: $(output_bin)
 .PHONY: debug
 debug: $(output_bin)
 	arm-none-eabi-gdb $(output_elf)
+
+.PHONY: openocd
+openocd:
+	openocd -f interface/stlink-v2.cfg -f target/stm32f4x.cfg

@@ -3,22 +3,14 @@
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_spi.h>
 
-static SPI_HandleTypeDef hspi[] = {
-    {
-        .Instance = SPI1,
-    },
-    {
-        .Instance = SPI2,
-    },
-    {
-        .Instance = SPI3,
-    },
-};
+static SPI_HandleTypeDef hspi[3] = {0};
 
 static void spi_init_cb(const unsigned int index)
 {
     SPI_HandleTypeDef *const h =  &hspi[index];
+    SPI_TypeDef *const instance[] = {SPI1, SPI2, SPI3};
 
+    h->Instance               = instance[index];
     h->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
     h->Init.CLKPhase          = SPI_PHASE_2EDGE;
     h->Init.CLKPolarity       = SPI_POLARITY_HIGH;
@@ -47,10 +39,6 @@ void spi_set_speed(const unsigned int index, const unsigned int speed)
 {
     SPI_HandleTypeDef *const h =  &hspi[index];
 
-    if (index >= ARRAY_SIZE(hspi)) {
-        Error_Handler();
-    }
-
     __HAL_SPI_DISABLE(h);
     h->Instance->CR1 &= 0xFFC7;
     h->Instance->CR1 |= speed;
@@ -60,5 +48,31 @@ void spi_set_speed(const unsigned int index, const unsigned int speed)
 bool spi_transmitreceive(const unsigned int index, void *txbuf, void *rxbuf,
     const uint16_t size, const unsigned int timeout)
 {
-    return (HAL_SPI_TransmitReceive(&hspi[index], txbuf, rxbuf, size, timeout) == HAL_OK);
+    if (HAL_SPI_TransmitReceive(&hspi[index], txbuf, rxbuf, size, timeout) != HAL_OK) {
+       Error_Handler();
+    }
+    return true;
+}
+
+bool spi_receive(const unsigned int index, void *rxbuf, const uint16_t size, const unsigned int timeout)
+{
+    if (HAL_SPI_Receive(&hspi[index], rxbuf, size, timeout) != HAL_OK) {
+        Error_Handler();
+    }
+
+    return true;
+}
+
+bool spi_transmit(const unsigned int index, void *txbuf, const uint16_t size, const unsigned int timeout)
+{
+    if (HAL_SPI_Transmit(&hspi[index], txbuf, size, timeout) != HAL_OK) {
+        Error_Handler();
+    }
+
+    return true;
+}
+
+void SPI1_IRQHandler(void)
+{
+    HAL_SPI_IRQHandler(&hspi[0]);
 }

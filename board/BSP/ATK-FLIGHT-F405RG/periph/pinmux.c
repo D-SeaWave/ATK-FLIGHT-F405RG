@@ -41,7 +41,7 @@ static void periph_interrupt_config(void)
     periph_enable_interrupt(USART3_IRQn, 3, 3);
     periph_enable_interrupt(UART4_IRQn, 3, 3);
     periph_enable_interrupt(UART5_IRQn, 3, 3);
-    periph_enable_interrupt(SPI1_IRQn, 0, 1);
+    //periph_enable_interrupt(SPI1_IRQn, 0, 1);
     /*
     periph_enable_interrupt(SPI2_IRQn, 0, 1);
     periph_enable_interrupt(SPI3_IRQn, 0, 1);
@@ -90,8 +90,9 @@ void pinmux_init(void)
     gpio.Alternate = GPIO_AF8_UART5;
     HAL_GPIO_Init(GPIOD, &gpio);
 
-    gpio.Pull = GPIO_PULLDOWN;
     /* SPI1 */
+    gpio.Pull = GPIO_PULLUP;
+    //gpio.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     gpio.Pin = GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
     gpio.Alternate = GPIO_AF5_SPI1;
     HAL_GPIO_Init(GPIOA, &gpio);
@@ -104,9 +105,10 @@ void pinmux_init(void)
     /* SPI3 */
     gpio.Pin = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6;
     gpio.Alternate = GPIO_AF6_SPI3;
-    HAL_GPIO_Init(GPIOA, &gpio);
+    HAL_GPIO_Init(GPIOB, &gpio);
 
     /* TIM3 */
+    gpio.Speed = GPIO_SPEED_FAST;
     gpio.Pin = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
     gpio.Alternate = GPIO_AF2_TIM3;
     HAL_GPIO_Init(GPIOC, &gpio);
@@ -119,15 +121,16 @@ void pinmux_init(void)
 #endif
 
     /* 普通GPIO口初始化 */
+    gpio.Pull = GPIO_PULLDOWN;
     gpio.Alternate = 0;
     gpio.Mode = GPIO_MODE_OUTPUT_PP;
 
     /* SPI1 CS - MPU9250 */
-    gpio.Pin = GPIO_PIN_1;
+    gpio.Pin = GPIO_PIN_2;
     HAL_GPIO_Init(GPIOC, &gpio);
 
     /* SPI2 CS - SD */
-    gpio.Pin = GPIO_PIN_0;
+    gpio.Pin = GPIO_PIN_1;
     HAL_GPIO_Init(GPIOC, &gpio);
 
     /* SPI3 CS - AT7456 */
@@ -158,7 +161,7 @@ void pinmux_init(void)
     /* EXT INT - MPU9250 */
     gpio.Pin = GPIO_PIN_3;
     gpio.Alternate = GPIO_AF15_EVENTOUT;
+    gpio_set_pin(GPIOB, GPIO_PIN_9);
     __ISB();
     __DSB();
-    gpio_set_pin(GPIOB, GPIO_PIN_9);
 }

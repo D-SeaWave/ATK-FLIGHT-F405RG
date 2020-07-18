@@ -4,6 +4,7 @@
 #include <periph/pinmux.h>
 #include <periph/usart-uart.h>
 #include <periph/spi.h>
+#include <periph/gpio.h>
 #include <driver/mpu6000.h>
 
 extern void xPortPendSVHandler(void) __attribute__ (( naked ));
@@ -65,7 +66,11 @@ void SysTick_Handler(void)
 void Error_Handler(void)
 {
     while (1) {
-        continue;
+        gpio_set_pin(GPIOB, GPIO_PIN_9);
+        delay_ms(1000);
+        gpio_reset_pin(GPIOB, GPIO_PIN_9);
+        delay_ms(1000);
+        err("error!!!\r\n");
 	}
 }
 
