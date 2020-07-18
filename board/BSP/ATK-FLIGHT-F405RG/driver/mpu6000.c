@@ -132,22 +132,27 @@
 
 #define ACC_GYRO_RAWDATA_LEN	    14
 
-#define mpu6000_enable()            gpio_set_pin(GPIOC, GPIO_PIN_2)
-#define mpu6000_disable()           gpio_reset_pin(GPIOC, GPIO_PIN_2)
+#define mpu6000_enable()            gpio_reset_pin(GPIOC, GPIO_PIN_2)
+#define mpu6000_disable()           gpio_set_pin(GPIOC, GPIO_PIN_2)
 
 static void mpu6000_write_reg(uint8_t reg, uint8_t data)
 {
+    mpu6000_enable();
     delay_ms(1);
-    spi_transmit(0, &reg, 1, 1000);
-    spi_transmit(0, &data, 1, 1000);
+    spi_transmitreceive(0, &reg, &reg, 1, 1000);
+    spi_transmitreceive(0, &data, &data, 1, 1000);
+    mpu6000_disable();
     delay_ms(1);
 }
 
 static void mpu6000_read_reg(uint8_t reg, uint16_t len, void *data)
 {
     reg |= 0x80;
-    spi_transmit(0, &reg, 1, 1000);
-    spi_receive(0, data, len, 1000);
+    memset(data, 0xFF, len);
+    mpu6000_enable();
+    spi_transmitreceive(0, &reg, &reg, 1, 1000);
+    spi_transmitreceive(0, data, data, len, 1000);
+    mpu6000_disable();
 }
 
 static void mpu6000_read_h3vevtor(uint8_t reg, hvector3d_t *vec)
@@ -172,20 +177,18 @@ void mpu6000_init(void)
 {
     unsigned char id;
 
-    mpu6000_enable();
     mpu6000_write_reg(MPU_RA_PWR_MGMT_1, BIT_H_RESET);
-    delay_ms(500);
+    delay_ms(50);
     mpu6000_write_reg(MPU_RA_SIGNAL_PATH_RESET, BIT_GYRO | BIT_ACC | BIT_TEMP);
-    delay_ms(500);
+    delay_ms(50);
     mpu6000_write_reg(MPU_RA_PWR_MGMT_1, BIT_H_RESET);
-    delay_ms(500);
+    delay_ms(50);
     mpu6000_write_reg(MPU_RA_SIGNAL_PATH_RESET, BIT_GYRO | BIT_ACC | BIT_TEMP);
-    delay_ms(500);
+    delay_ms(50);
 
-    id = 0;
     mpu6000_read_reg(MPU_RA_WHO_AM_I, 1, &id);
     if (id != MPU_DEVICE_ID) {
-        err("failed to init mpu6000\r\n");
+        err("read error id 0x%02x!", id);
         Error_Handler();
     }
 

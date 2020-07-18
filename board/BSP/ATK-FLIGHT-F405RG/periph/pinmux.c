@@ -34,20 +34,18 @@ static void periph_enable_interrupt(IRQn_Type irq, uint32_t preempt_pri, uint32_
     HAL_NVIC_SetPriority(irq, preempt_pri, subpri);
 }
 
-static void periph_interrupt_config(void)
+void periph_interrupt_config(void)
 {
     periph_enable_interrupt(USART1_IRQn, 3, 3);
     periph_enable_interrupt(USART2_IRQn, 3, 3);
     periph_enable_interrupt(USART3_IRQn, 3, 3);
     periph_enable_interrupt(UART4_IRQn, 3, 3);
     periph_enable_interrupt(UART5_IRQn, 3, 3);
-    //periph_enable_interrupt(SPI1_IRQn, 0, 1);
     /*
+    periph_enable_interrupt(SPI1_IRQn, 0, 1);
     periph_enable_interrupt(SPI2_IRQn, 0, 1);
     periph_enable_interrupt(SPI3_IRQn, 0, 1);
      */
-    HAL_NVIC_DisableIRQ(WWDG_IRQn);
-    HAL_NVIC_DisableIRQ(USART6_IRQn);
 }
 
 void pinmux_init(void)
@@ -55,7 +53,6 @@ void pinmux_init(void)
     GPIO_InitTypeDef gpio;
 
     periph_clock_enable();
-    periph_interrupt_config();
     gpio.Pull = GPIO_NOPULL;
     gpio.Mode = GPIO_MODE_AF_PP;
     gpio.Speed = GPIO_SPEED_FAST;
@@ -121,7 +118,6 @@ void pinmux_init(void)
 #endif
 
     /* 普通GPIO口初始化 */
-    gpio.Pull = GPIO_PULLDOWN;
     gpio.Alternate = 0;
     gpio.Mode = GPIO_MODE_OUTPUT_PP;
 
@@ -149,7 +145,6 @@ void pinmux_init(void)
     gpio.Pin = GPIO_PIN_9;
     HAL_GPIO_Init(GPIOB, &gpio);
 
-    gpio.Pull = GPIO_PULLUP;
     /* LED 1, RED LED */
     /* gpio.Pin = GPIO_PIN_14;
     HAL_GPIO_Init(GPIOA, &gpio); */
@@ -161,7 +156,6 @@ void pinmux_init(void)
     /* EXT INT - MPU9250 */
     gpio.Pin = GPIO_PIN_3;
     gpio.Alternate = GPIO_AF15_EVENTOUT;
-    gpio_set_pin(GPIOB, GPIO_PIN_9);
     __ISB();
     __DSB();
 }

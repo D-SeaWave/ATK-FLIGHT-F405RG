@@ -9,7 +9,7 @@
 
 #define ARRAY_SIZE(array)   (sizeof(array) / sizeof(array[0]))
 
-#define log_level(level, fmt, args...)  printf("["level"] %s:%d - " fmt, __func__, __LINE__, ##args)
+#define log_level(level, fmt, args...)  printf("["level"] %s:%d - " fmt"\r\n", __func__, __LINE__, ##args)
 #define info(fmt, args...)              log_level("info", fmt, ##args)
 #define warn(fmt, args...)              log_level("warn", fmt, ##args)
 #define err(fmt, args...)               log_level("error", fmt, ##args)

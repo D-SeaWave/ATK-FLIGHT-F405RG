@@ -35,41 +35,10 @@ void spi_init(void)
     spi_init_cb(2);
 }
 
-void spi_set_speed(const unsigned int index, const unsigned int speed)
-{
-    SPI_HandleTypeDef *const h =  &hspi[index];
-
-    __HAL_SPI_DISABLE(h);
-    h->Instance->CR1 &= 0xFFC7;
-    h->Instance->CR1 |= speed;
-    __HAL_SPI_ENABLE(h);
-}
-
 bool spi_transmitreceive(const unsigned int index, void *txbuf, void *rxbuf,
     const uint16_t size, const unsigned int timeout)
 {
-    if (HAL_SPI_TransmitReceive(&hspi[index], txbuf, rxbuf, size, timeout) != HAL_OK) {
-       Error_Handler();
-    }
-    return true;
-}
-
-bool spi_receive(const unsigned int index, void *rxbuf, const uint16_t size, const unsigned int timeout)
-{
-    if (HAL_SPI_Receive(&hspi[index], rxbuf, size, timeout) != HAL_OK) {
-        Error_Handler();
-    }
-
-    return true;
-}
-
-bool spi_transmit(const unsigned int index, void *txbuf, const uint16_t size, const unsigned int timeout)
-{
-    if (HAL_SPI_Transmit(&hspi[index], txbuf, size, timeout) != HAL_OK) {
-        Error_Handler();
-    }
-
-    return true;
+    return (HAL_SPI_TransmitReceive(&hspi[index], txbuf, rxbuf, size, timeout) == HAL_OK);
 }
 
 void SPI1_IRQHandler(void)

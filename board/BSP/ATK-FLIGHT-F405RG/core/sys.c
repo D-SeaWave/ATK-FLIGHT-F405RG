@@ -126,4 +126,5 @@ void system_init(void)
     uart_init();
     spi_init();
     mpu6000_init();
+    periph_interrupt_config();
 }
