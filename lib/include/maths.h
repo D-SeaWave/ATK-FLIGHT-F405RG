@@ -1,30 +1,16 @@
-﻿#pragma once
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+﻿#ifndef __LIB_MATHS_H__
+#define __LIB_MATHS_H__
 
 #include <math.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#define MATHS_SUPPORT_DOUBLE_PRECISION
-
-#if defined( MATHS_SUPPORT_DOUBLE_PRECISION )
-#define FLOAT   double
-#define M_PIf   acos(-1.0L)
-#define SQRTF   sqrt
-#define FABSF   fabs
-#define ASINF   asin
-#define ATAN2F  atan2
-#else
-#define FLOAT   float
+#define float   float
 #define M_PIf   acosf(-1.0f)
 #define SQRTF   sqrtf
 #define FABSF   fabsf
 #define ASINF   asinf
 #define ATAN2F  atan2f
-#endif
 
 #define QUATERNION_DEFAULT_INITIALIZER      {1.0, 0.0, 0.0, 0.0}
 #define QUATERNION_DEFAULT(q)               \
@@ -37,25 +23,25 @@ typedef struct {
 } hvector3d_t;
 
 typedef struct {
-    FLOAT x;
-    FLOAT y;
-    FLOAT z;
+    float x;
+    float y;
+    float z;
 } fvector3d_t;
 
 typedef struct {
-    FLOAT pitch;    /* 俯仰角 */
-    FLOAT roll;     /* 横滚角 */
-    FLOAT yaw;      /* 偏航角 */
+    float pitch;    /* 俯仰角 */
+    float roll;     /* 横滚角 */
+    float yaw;      /* 偏航角 */
 } euler_angle_t;
 
-typedef FLOAT quaternion_t[4];
+typedef float quaternion_t[4];
 
-static inline FLOAT degrees2radians(const FLOAT degrees)
+static inline float degrees2radians(const float degrees)
 {
     return degrees * (M_PIf / 180.0f);
 }
 
-static inline FLOAT radians2degrees(const FLOAT rad)
+static inline float radians2degrees(const float rad)
 {
     return rad * (180.0f / M_PIf);
 }
@@ -65,36 +51,36 @@ static inline int16_t tole16(int16_t raw_value)
     return (raw_value << 8) | (raw_value >> 8);
 }
 
-extern FLOAT fvector3d_size(const fvector3d_t *v);
+extern float fvector3d_square(const fvector3d_t *v);
 
-extern fvector3d_t *fvector3d_add(fvector3d_t *res, const fvector3d_t *v, const fvector3d_t *restrict value);
+extern void fvector3d_add(fvector3d_t *res, const fvector3d_t *v, const fvector3d_t *value);
 
-extern fvector3d_t *fvector3d_scale(fvector3d_t *res, const fvector3d_t *v, const FLOAT t);
+extern void fvector3d_scale(fvector3d_t *res, const fvector3d_t *v, const float t);
 
-extern fvector3d_t *fvector3d_normalize(fvector3d_t *res, const fvector3d_t *v);
+extern void fvector3d_vscale(fvector3d_t *res, const fvector3d_t *v, const fvector3d_t *t);
 
-extern hvector3d_t *hvector3d_add(hvector3d_t *res, const hvector3d_t *v, const hvector3d_t *restrict value);
+extern void fvector3d_normalize(fvector3d_t *res, const fvector3d_t *v);
 
-extern hvector3d_t *hvector3d_scale(hvector3d_t *res, const hvector3d_t *v, const short t);
+extern void hvector3d_add(hvector3d_t *res, const hvector3d_t *v, const hvector3d_t *value);
 
-extern hvector3d_t *hvector3d_scale3x(hvector3d_t *res, const hvector3d_t *v, const hvector3d_t *restrict t);
+extern void hvector3d_scale(hvector3d_t *res, const hvector3d_t *v, const short t);
+
+extern void hvector3d_vscale(hvector3d_t *res, const hvector3d_t *v, const hvector3d_t *t);
 
 /**
  * quaternion_normalize 四元数归一化
  *
  * @q 四元数
- * 返回四元数的地址
  */
-extern quaternion_t *quaternion_normalize(quaternion_t *restrict q);
+extern void quaternion_normalize(quaternion_t *q);
 
 /**
  * quaternion_update 四元数更新，使用四阶毕卡解法
  * 
  * @q 四元数
  * @delta 3轴角增量
- * 返回四元数的地址
  */
-extern quaternion_t *quaternion_update(quaternion_t *restrict q, const fvector3d_t *restrict delta);
+extern void quaternion_update(quaternion_t *restrict q, const fvector3d_t *restrict delta);
 
 /**
  * quaternion_update 四元数更新，使用四阶毕卡解法
@@ -102,19 +88,17 @@ extern quaternion_t *quaternion_update(quaternion_t *restrict q, const fvector3d
  * @q 四元数
  * @w 3轴角速度
  * @dt 采样间隔时间
- * 返回四元数的地址
  */
-extern quaternion_t *quaternion_update_raw(quaternion_t *restrict q, const fvector3d_t *restrict w,
-    const FLOAT dt);
+extern void quaternion_update_raw(quaternion_t *restrict q, const fvector3d_t *restrict w,
+    const float dt);
 
 /**
  * quaternion_to_euler 四元数求欧拉角
  *
  * @angle 欧拉角，弧度值
  * @q 四元数
- * 返回欧拉角的地址
  */
-extern euler_angle_t *quaternion_to_euler(euler_angle_t *restrict angle, const quaternion_t *restrict q);
+extern void quaternion_to_euler(euler_angle_t *restrict angle, const quaternion_t *restrict q);
 
 /**
  * @brief bits_count 计算出一个整数中1的位数
@@ -133,8 +117,6 @@ extern int gcd(const int a, const int b);
  * @param rows 增广矩阵的行数
  * @return 方程有解返回，如果没有解，返回-1
  */
-extern int gaussian_elimination(FLOAT *restrict matrix, FLOAT *restrict res, const unsigned int rows);
+extern int gaussian_elimination(float *restrict matrix, float *restrict res, const unsigned int rows);
 
-#ifdef __cplusplus
-}
-#endif
+#endif /* __LIB_MATHS_H__ */

@@ -135,6 +135,8 @@
 #define mpu6000_enable()            gpio_reset_pin(GPIOC, GPIO_PIN_2)
 #define mpu6000_disable()           gpio_set_pin(GPIOC, GPIO_PIN_2)
 
+static xQueueHandle queue_mpu = NULL;
+
 static void mpu6000_write_reg(uint8_t reg, uint8_t data)
 {
     mpu6000_enable();
@@ -163,12 +165,12 @@ static void mpu6000_read_h3vevtor(uint8_t reg, hvector3d_t *vec)
     vec->z = tole16(vec->z);
 }
 
-void mpu6000_read_gyro(hvector3d_t *gyro)
+static inline void mpu6000_read_gyro(hvector3d_t *gyro)
 {
     mpu6000_read_h3vevtor(MPU_RA_GYRO_XOUT_H, gyro);
 }
 
-void mpu6000_read_acc(hvector3d_t *acc)
+static inline void mpu6000_read_acc(hvector3d_t *acc)
 {
     mpu6000_read_h3vevtor(MPU_RA_ACCEL_XOUT_H, acc);
 }
@@ -202,8 +204,47 @@ void mpu6000_init(void)
     delay_ms(15);
     mpu6000_write_reg(MPU_RA_ACCEL_CONFIG, 0x02 << 3);
     delay_ms(15);
-    mpu6000_write_reg(MPU_RA_INT_PIN_CFG, 0x10);
+    mpu6000_write_reg(MPU_RA_INT_PIN_CFG, 0x80);
     delay_ms(15);
     mpu6000_write_reg(MPU_RA_CONFIG, BITS_DLPF_CFG_98HZ);
     delay_ms(15);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t pin)
+{
+    uint8_t status;
+    mpu6000_data_t data;
+    static uint32_t timestamp = 0;
+
+    if (queue_mpu == NULL) {
+        return;
+    }
+
+    status = 0;
+    mpu6000_read_reg(MPU_RA_INT_STATUS, 1, &status);
+    if (status & 0x01) {
+        data.timestamp = timestamp++;
+        mpu6000_read_gyro(&data.gyro);
+        mpu6000_read_acc(&data.acc);
+        status = xQueueSend(queue_mpu, &data, 0);
+        if (status) {
+           // printf("send success\r\n");
+        } else {
+            //printf("send failed\r\n");
+        }
+    }
+}
+
+void EXTI3_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
+}
+
+int mpu6000_receive_data(mpu6000_data_t *data)
+{
+    if (queue_mpu == NULL) {
+        xQueueCreate(2, sizeof(mpu6000_data_t));
+    }
+
+    return xQueueReceive(queue_mpu, data, portMAX_DELAY) == pdPASS;
 }

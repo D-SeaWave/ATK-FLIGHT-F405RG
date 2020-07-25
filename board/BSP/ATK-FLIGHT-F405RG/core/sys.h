@@ -6,6 +6,9 @@
 #include <stm32f4xx.h>
 #include <stm32f4xx_hal.h>
 #include <cachel1_armv7.h>
+#include <FreeRTOS.h>
+#include <task.h>
+#include <queue.h>
 
 #define ARRAY_SIZE(array)   (sizeof(array) / sizeof(array[0]))
 

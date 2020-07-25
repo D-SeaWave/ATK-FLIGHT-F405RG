@@ -120,6 +120,7 @@ void system_clock_init(void)
 
 void system_init(void)
 {
+    SCB->SHCSR |= 0x00007000;;
     HAL_Init();
     system_clock_init();
     pinmux_init();
@@ -127,4 +128,57 @@ void system_init(void)
     spi_init();
     mpu6000_init();
     periph_interrupt_config();
+}
+
+void HardFault_Handler(void)
+{
+    __asm volatile(
+        "tst    lr, #4      \n"
+        "ite    eq          \n"
+        "mrseq  r0, msp     \n"
+        "mrsne  r0, psp     \n"
+        "b      HardFault_Handler_CallBack\n"
+    );
+}
+
+void HardFault_Handler_CallBack(unsigned int *args)
+{
+    unsigned int stacked_r0;
+    unsigned int stacked_r1;
+    unsigned int stacked_r2;
+    unsigned int stacked_r3;
+    unsigned int stacked_r12;
+    unsigned int stacked_lr;
+    unsigned int stacked_pc;
+    unsigned int stacked_psr;
+
+    stacked_r0  = args[0];
+    stacked_r1  = args[1];
+    stacked_r2  = args[2];
+    stacked_r3  = args[3];
+    stacked_r12 = args[4];
+    stacked_lr  = args[5];
+    stacked_pc  = args[6];
+    stacked_psr = args[7];
+    printf("\r\n[Hard fault handler - all numbers in hex]\r\n");
+    printf("r0   :  %X\r\n", stacked_r0);
+    printf("r1   :  %X\r\n", stacked_r1);
+    printf("r2   :  %X\r\n", stacked_r2);
+    printf("r3   :  %X\r\n", stacked_r3);
+    printf("r12  :  %X\r\n", stacked_r12);
+    printf("lr   :  %X\r\n", stacked_lr);
+    printf("pc   :  %X\r\n", stacked_pc);
+    printf("psr  :  %X\r\n", stacked_psr);
+    printf("BFAR :  %lX\r\n", SCB->BFAR);
+    printf("CFSR :  %lX\r\n", SCB->CFSR);
+    printf("HFSR :  %lX\r\n", SCB->HFSR);
+    printf("DFSR :  %lX\r\n", SCB->DFSR);
+    printf("AFSR :  %lX\r\n", SCB->AFSR);
+    printf("SHCSR : %lX\r\n", SCB->SHCSR);
+    while (1) {
+        gpio_set_pin(GPIOB, GPIO_PIN_9);
+        delay_ms(1000);
+        gpio_reset_pin(GPIOB, GPIO_PIN_9);
+        delay_ms(1000);
+    }
 }

@@ -49,8 +49,8 @@ objs   := $(s_objs) $(c_objs)
 depend_files := $(patsubst %.o, %.d, $(c_objs))
 assembling_files := $(patsubst %.c, %.s, $(SOURCE_FILES_LIST))
 
-output_bin := $(PROJECT_ROOT)/$(BOARD).bin
-output_elf := $(PROJECT_ROOT)/$(BOARD).elf
+output_bin := $(BOARD).bin
+output_elf := $(BOARD).elf
 
 define compile_c
 @echo CC	$1

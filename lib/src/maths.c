@@ -3,80 +3,79 @@
 #include <string.h>
 #include "maths.h"
 
-FLOAT fvector3d_size(const fvector3d_t *restrict v)
+float fvector3d_square(const fvector3d_t *restrict v)
 {
     return v->x * v->x + v->y * v->y + v->z * v->z;
 }
 
-fvector3d_t *fvector3d_add(fvector3d_t *res, const fvector3d_t *v, const fvector3d_t *restrict value)
+float fvector3d_size(const fvector3d_t *v)
+{
+    return sqrtf(fvector3d_square(v));
+}
+
+void fvector3d_add(fvector3d_t *res, const fvector3d_t *v, const fvector3d_t *value)
 {
     res->x = v->x + value->x;
     res->y = v->y + value->y;
     res->z = v->z + value->z;
-
-    return res;
 }
 
-fvector3d_t *fvector3d_scale(fvector3d_t *res, const fvector3d_t *v, const FLOAT t)
+void fvector3d_scale(fvector3d_t *res, const fvector3d_t *v, const float t)
 {
     res->x = v->x * t;
     res->y = v->y * t;
     res->z = v->z * t;
-
-    return res;
 }
 
-fvector3d_t *fvector3d_normalize(fvector3d_t *res, const fvector3d_t *v)
-{
-    FLOAT size;
-
-    size = fvector3d_size(v);
-    if (size == 0.0f) {
-        res->x = 0.0f;
-        res->y = 0.0f;
-        res->z = 0.0f;
-
-        return res;
-    }
-
-    size = SQRTF(size);
-    res->x = v->x / size;
-    res->y = v->y / size;
-    res->z = v->z / size;
-
-    return res;
-}
-
-short hvector3d_size(const hvector3d_t *restrict v)
-{
-    return v->x * v->x + v->y * v->y + v->z * v->z;
-}
-
-hvector3d_t *hvector3d_add(hvector3d_t *res, const hvector3d_t *v, const hvector3d_t *restrict value)
-{
-    res->x = v->x + value->x;
-    res->y = v->y + value->y;
-    res->z = v->z + value->z;
-
-    return res;
-}
-
-hvector3d_t *hvector3d_scale(hvector3d_t *res, const hvector3d_t *v, const short t)
-{
-    res->x = v->x * t;
-    res->y = v->y * t;
-    res->z = v->z * t;
-
-    return res;
-}
-
-hvector3d_t *hvector3d_scale3x(hvector3d_t *res, const hvector3d_t *v, const hvector3d_t *restrict t)
+void fvector3d_vscale(fvector3d_t *res, const fvector3d_t *v, const fvector3d_t *t)
 {
     res->x = v->x * t->x;
     res->y = v->y * t->y;
     res->z = v->z * t->z;
+}
 
-    return res;
+void fvector3d_normalize(fvector3d_t *res, const fvector3d_t *v)
+{
+    float size;
+
+    size = fvector3d_square(v);
+    if (size == 0.0f) {
+        res->x = 0.0f;
+        res->y = 0.0f;
+        res->z = 0.0f;
+        return;
+    }
+
+    size = sqrtf(size);
+    res->x = v->x / size;
+    res->y = v->y / size;
+    res->z = v->z / size;
+}
+
+short hvector3d_square(const hvector3d_t *v)
+{
+    return v->x * v->x + v->y * v->y + v->z * v->z;
+}
+
+void hvector3d_add(hvector3d_t *res, const hvector3d_t *v, const hvector3d_t *value)
+{
+    res->x = v->x + value->x;
+    res->y = v->y + value->y;
+    res->z = v->z + value->z;
+}
+
+void hvector3d_scale(hvector3d_t *res, const hvector3d_t *v, const short t)
+{
+    res->x = v->x * t;
+    res->y = v->y * t;
+    res->z = v->z * t;
+}
+
+void hvector3d_scale3x(hvector3d_t *res, const hvector3d_t *v, const hvector3d_t *t)
+{
+    res->x = v->x * t->x;
+    res->y = v->y * t->y;
+    res->z = v->z * t->z;
 }
 
 unsigned char bits_count(unsigned int i)
@@ -95,14 +94,14 @@ int gcd(const int a, const int b)
     return (a % b == 0) ? b : gcd(b, a % b);
 }
 
-int gaussian_elimination(FLOAT *restrict matrix, FLOAT *restrict res, const unsigned int rows)
+int gaussian_elimination(float *restrict matrix, float *restrict res, const unsigned int rows)
 {
     int ret;
     unsigned int j, i;
-    unsigned int next_row, next_offset, current_offset;
     unsigned int max_main_element_row, row_offset;
+    unsigned int next_row, next_offset, current_offset;
+    float current_main_element, temp, sum;
     const unsigned int columns = rows + 1;
-    FLOAT current_main_element, temp, sum;
 
     if (matrix == NULL || res == NULL || rows == 0) {
         return -1;
@@ -169,4 +168,3 @@ int gaussian_elimination(FLOAT *restrict matrix, FLOAT *restrict res, const unsi
 
     return ret;
 }
-

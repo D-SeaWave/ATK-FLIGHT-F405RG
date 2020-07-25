@@ -28,24 +28,30 @@ static void periph_clock_enable(void)
      */
 }
 
-static void periph_enable_interrupt(IRQn_Type irq, uint32_t preempt_pri, uint32_t subpri)
+static void enable_interrupt(IRQn_Type irq, uint32_t preempt_pri, uint32_t subpri)
 {
     HAL_NVIC_EnableIRQ(irq);
     HAL_NVIC_SetPriority(irq, preempt_pri, subpri);
 }
 
+static inline void external_line_interrupt_config(void)
+{
+    enable_interrupt(EXTI3_IRQn, 4, 4);
+}
+
 void periph_interrupt_config(void)
 {
-    periph_enable_interrupt(USART1_IRQn, 3, 3);
-    periph_enable_interrupt(USART2_IRQn, 3, 3);
-    periph_enable_interrupt(USART3_IRQn, 3, 3);
-    periph_enable_interrupt(UART4_IRQn, 3, 3);
-    periph_enable_interrupt(UART5_IRQn, 3, 3);
+    enable_interrupt(USART1_IRQn, 3, 3);
+    enable_interrupt(USART2_IRQn, 3, 3);
+    enable_interrupt(USART3_IRQn, 3, 3);
+    enable_interrupt(UART4_IRQn, 3, 3);
+    enable_interrupt(UART5_IRQn, 3, 3);
     /*
-    periph_enable_interrupt(SPI1_IRQn, 0, 1);
-    periph_enable_interrupt(SPI2_IRQn, 0, 1);
-    periph_enable_interrupt(SPI3_IRQn, 0, 1);
+    enable_interrupt(SPI1_IRQn, 0, 1);
+    enable_interrupt(SPI2_IRQn, 0, 1);
+    enable_interrupt(SPI3_IRQn, 0, 1);
      */
+    external_line_interrupt_config();
 }
 
 void pinmux_init(void)
@@ -155,7 +161,8 @@ void pinmux_init(void)
 
     /* EXT INT - MPU9250 */
     gpio.Pin = GPIO_PIN_3;
+    gpio.Mode = GPIO_MODE_IT_RISING;
     gpio.Alternate = GPIO_AF15_EVENTOUT;
-    __ISB();
-    __DSB();
+    gpio.Pull = GPIO_PULLDOWN;
+    HAL_GPIO_Init(GPIOC, &gpio);
 }
