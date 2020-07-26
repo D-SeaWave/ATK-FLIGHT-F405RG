@@ -126,16 +126,14 @@
 #define BIT_RAW_RDY_EN              0x01
 #define BIT_I2C_IF_DIS              0x10
 #define BIT_INT_STATUS_DATA         0x01
-#define BIT_GYRO                    3
-#define BIT_ACC                     2
-#define BIT_TEMP                    1
+#define BIT_GYRO                    (1 << 3)
+#define BIT_ACC                     (1 << 2)
+#define BIT_TEMP                    (1 << 1)
 
 #define ACC_GYRO_RAWDATA_LEN	    14
 
 #define mpu6000_enable()            gpio_reset_pin(GPIOC, GPIO_PIN_2)
 #define mpu6000_disable()           gpio_set_pin(GPIOC, GPIO_PIN_2)
-
-static xQueueHandle queue_mpu = NULL;
 
 static void mpu6000_write_reg(uint8_t reg, uint8_t data)
 {
@@ -196,55 +194,55 @@ void mpu6000_init(void)
 
     mpu6000_write_reg(MPU_RA_PWR_MGMT_1, MPU_CLK_SEL_PLLGYROX);
     delay_ms(15);
+    mpu6000_write_reg(MPU_RA_USER_CTRL, BIT_I2C_IF_DIS);
+    delay_ms(15);
     mpu6000_write_reg(MPU_RA_PWR_MGMT_2, 0);
     delay_ms(15);
     mpu6000_write_reg(MPU_RA_SMPLRT_DIV, 0);
     delay_ms(15);
-    mpu6000_write_reg(MPU_RA_GYRO_CONFIG, 0x03 << 3);
+    mpu6000_write_reg(MPU_RA_GYRO_CONFIG, 3 << 3);
     delay_ms(15);
-    mpu6000_write_reg(MPU_RA_ACCEL_CONFIG, 0x02 << 3);
+    mpu6000_write_reg(MPU_RA_ACCEL_CONFIG, 2 << 3);
     delay_ms(15);
-    mpu6000_write_reg(MPU_RA_INT_PIN_CFG, 0x80);
+    mpu6000_write_reg(MPU_RA_INT_PIN_CFG, 0x12);
+    delay_ms(15);
+    mpu6000_write_reg(MPU_RA_INT_ENABLE, 0x01);
     delay_ms(15);
     mpu6000_write_reg(MPU_RA_CONFIG, BITS_DLPF_CFG_98HZ);
     delay_ms(15);
 }
 
+static mpu6000_data_t mpu6000_data = {0};
+
 void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {
     uint8_t status;
-    mpu6000_data_t data;
-    static uint32_t timestamp = 0;
-
-    if (queue_mpu == NULL) {
-        return;
-    }
 
     status = 0;
     mpu6000_read_reg(MPU_RA_INT_STATUS, 1, &status);
     if (status & 0x01) {
-        data.timestamp = timestamp++;
-        mpu6000_read_gyro(&data.gyro);
-        mpu6000_read_acc(&data.acc);
-        status = xQueueSend(queue_mpu, &data, 0);
-        if (status) {
-           // printf("send success\r\n");
-        } else {
-            //printf("send failed\r\n");
-        }
+        mpu6000_read_gyro(&mpu6000_data.gyro);
+        mpu6000_read_acc(&mpu6000_data.acc);
+        mpu6000_data.timestamp++;
     }
 }
 
 void EXTI3_IRQHandler(void)
 {
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_3);
+    HAL_GPIO_EXTI_Callback(0);
 }
 
 int mpu6000_receive_data(mpu6000_data_t *data)
 {
-    if (queue_mpu == NULL) {
-        xQueueCreate(2, sizeof(mpu6000_data_t));
+    static uint32_t count = 0xFFFFFFFFU;
+
+    if (mpu6000_data.timestamp == count) {
+        return 0;
     }
 
-    return xQueueReceive(queue_mpu, data, portMAX_DELAY) == pdPASS;
+    *data = mpu6000_data;
+    count = data->timestamp;
+
+    return 1;
 }

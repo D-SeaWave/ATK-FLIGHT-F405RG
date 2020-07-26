@@ -14,7 +14,7 @@ void quaternion_normalize(quaternion_t *q)
 
 void quaternion_update(quaternion_t *restrict q, const fvector3d_t *restrict delta)
 {
-    float a, b;
+    float a;
     float delta2;
     quaternion_t _q;
     fvector3d_t tmp;
@@ -25,8 +25,7 @@ void quaternion_update(quaternion_t *restrict q, const fvector3d_t *restrict del
     _q[3] = (*q)[3];
     delta2 = fvector3d_square(delta);
     a = 1.0f - delta2 * (0.125f - delta2 / 384.0f);
-    b = 0.5f - delta2 / 48.0f;
-    fvector3d_scale(&tmp, delta, b);
+    fvector3d_scale(&tmp, delta, 0.5f - delta2 / 48.0f);
     (*q)[0] = a * _q[0] - tmp.x * _q[1] - tmp.y * _q[2] - tmp.z * _q[3];
     (*q)[1] = tmp.x * _q[0] + a * _q[1] + tmp.z * _q[2] - tmp.y * _q[3];
     (*q)[2] = tmp.y * _q[0] - tmp.z * _q[1] + a * _q[2] + tmp.x * _q[3];

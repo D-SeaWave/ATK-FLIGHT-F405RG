@@ -91,9 +91,10 @@ void mpu6000_task(void *param)
     int ret;
 
     while (1) {
-        if (!mpu6000_receive_data(&data)) {
-            vTaskDelay(1);
-            printf("data not received\r\n");
+        vPortEnterCritical();
+        ret = mpu6000_receive_data(&data);
+        vPortExitCritical();
+        if (ret == 0) {
             continue;
         }
 
@@ -105,19 +106,12 @@ void mpu6000_task(void *param)
         quaternion_to_euler(&angle, &q);
         ret = snprintf(buf, sizeof(buf), "[%.3f, %.3f, %.3f]\r\n", angle.pitch, angle.roll, angle.yaw);
         _write(0, buf, ret);
-        vTaskDelay(1);
     }
 }
 
 int main(void)
 {
-    BaseType_t ret;
-
-    ret = xTaskCreate(mpu6000_task, "mpu6000 task", 1000, NULL, 1, NULL);
-    if (ret == pdTRUE) {
-        printf("create task success\r\n");
-    }
+    xTaskCreate(mpu6000_task, "mpu6000 task", 1000, NULL, 1, NULL);
     vTaskStartScheduler();
-    while (1) {}
     return 0;
 }
